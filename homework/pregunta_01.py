@@ -5,6 +5,12 @@
 Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
 
+# Ciclo for que itere en files/input/test y train/negative, neutral y positive/*.txt (Ya está todo extraído)
+# De cada txt necesito extraer la información de cada línea iterada y la guarde en "train_dataset.csv" y "test_dataset.csv". respectivamente
+# La información dentro de estos será capturada por cada línea y se guardará en la columna phrase, tras
+# cada línea tendrá un número de ínidice a la izquierda empezando de 0
+
+
 
 def pregunta_01():
     """
@@ -71,3 +77,52 @@ def pregunta_01():
 
 
     """
+
+    import pandas as pd
+    import os
+
+    # 2. Definir la estructura de salida
+    # Creamos la carpeta output si no existe
+    if not os.path.exists('files/output'):
+        os.makedirs('files/output')
+
+    # Diccionario para iterar facilmente
+    datasets = ["train", "test"]
+    sentiments = ["positive", "negative", "neutral"]
+
+    # 3. Ciclo de ETL
+    for dataset in datasets: # Iterar train y test
+        data = [] # Lista para guardar diccionarios con la data
+
+        for sentiment in sentiments: # Iterar positive, negative, neutral
+            # Construir ruta: ej. input/train/positive
+            path = os.path.join("files/input", dataset, sentiment)
+            
+            # Verificar que la ruta exista antes de listar archivos
+            if os.path.exists(path):
+                # Iterar sobre cada archivo .txt en esa carpeta
+                for filename in os.listdir(path):
+                    if filename.endswith(".txt"):
+                        filepath = os.path.join(path, filename)
+                        
+                        # LEER EL ARCHIVO (Corrección principal a tu análisis)
+                        with open(filepath, "r", encoding="utf-8") as f:
+                            phrase = f.read() # Leemos todo el contenido, no por líneas
+                        
+                        # Agregar a la data
+                        data.append({
+                            "phrase": phrase,
+                            "target": sentiment # El target es el nombre de la carpeta
+                        })
+
+        # 4. Crear DataFrame y Guardar
+        df = pd.DataFrame(data)
+        
+        # Guardar en output/train_dataset.csv o test_dataset.csv
+        # index=True es por defecto, pero lo pongo explícito porque lo mencionaste
+        df.to_csv(f"files/output/{dataset}_dataset.csv", index=True)
+
+    print("Archivos generados exitosamente en la carpeta output/")
+
+
+pregunta_01()
